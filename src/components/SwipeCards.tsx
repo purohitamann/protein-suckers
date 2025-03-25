@@ -22,6 +22,7 @@ type MealCard = {
 
 type Props = {
   meals: MealCard[];
+  onIndexChange?: (index: number) => void;
 };
 
 const defaultMeal: MealCard = {
@@ -42,7 +43,7 @@ const defaultMeal: MealCard = {
   'ubereats-order-link': '#'
 };
 
-const SwipeCards: React.FC<Props> = ({ meals = [] }) => {
+const SwipeCards: React.FC<Props> = ({ meals = [], onIndexChange }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [lastDirection, setLastDirection] = useState<'left' | 'right' | null>(null);
   const [cardSize, setCardSize] = useState({ width: 300, height: 500 });
@@ -64,6 +65,10 @@ const SwipeCards: React.FC<Props> = ({ meals = [] }) => {
     window.addEventListener('resize', updateCardSize);
     return () => window.removeEventListener('resize', updateCardSize);
   }, []);
+
+  useEffect(() => {
+    onIndexChange?.(currentIndex);
+  }, [currentIndex, onIndexChange]);
 
   const handleStart = (clientX: number) => {
     isDragging.current = true;

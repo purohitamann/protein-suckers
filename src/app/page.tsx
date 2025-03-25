@@ -1,12 +1,12 @@
 'use client';
 
 import SwipeCards from "@/components/SwipeCards";
-import GeolocationFetch from "@/components/GeolocationFetch";
+import MapView from "@/components/MapView";
 import React, { useState, useEffect } from "react";
 
 const gymDadJokes = [
   "Why did the gym close down? It just didn't work out! 💪",
-  "What kind of exercise do lazy people do? Diddly-squats! 🏋️‍♂️",
+  "What kind of exercise do lazy people do? Diddly-squats! 🏋���‍♂️",
   "Why don't eggs exercise? They're afraid of getting scrambled! 🥚",
   "What did the weight say to the other weight? Let's get ripped! 🏋️",
   "Why did the cookie go to the gym? Because it wanted to become a wafer! 🍪",
@@ -17,6 +17,9 @@ export default function Home() {
   const [response, setResponse] = useState<any>(null);
   const [loading, setLoading] = useState(false);
   const [currentJoke, setCurrentJoke] = useState(0);
+  const [error, setError] = useState<string | null>(null);
+  const [currentCardIndex, setCurrentCardIndex] = useState(0);
+
   const [formData, setFormData] = useState({
     location: "",
     lat: "",
@@ -27,7 +30,6 @@ export default function Home() {
   });
 
   useEffect(() => {
-    // Get user's location
     navigator.geolocation.getCurrentPosition(
       (position) => {
         setFormData(prev => ({
@@ -36,7 +38,10 @@ export default function Home() {
           long: position.coords.longitude.toFixed(4)
         }));
       },
-      (error) => console.error("Error getting location:", error)
+      (error) => {
+        console.error("Error getting location:", error);
+        setError("Unable to get your location. Please enter your address manually.");
+      }
     );
 
     if (loading) {
@@ -50,16 +55,33 @@ export default function Home() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+    setError(null);
+
     try {
+      if (!formData.location && (!formData.lat || !formData.long)) {
+        throw new Error("Please enter your location or enable location services.");
+      }
+
       const res = await fetch('/api/nebius', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData)
       });
+
+      if (!res.ok) {
+        throw new Error("Failed to fetch meal suggestions. Please try again.");
+      }
+
       const data = await res.json();
+      
+      if (!data || !Array.isArray(data) || data.length === 0) {
+        throw new Error("No meals found matching your criteria. Try adjusting your filters.");
+      }
+
       setResponse(data);
     } catch (error) {
       console.error("Error fetching data:", error);
+      setError(error instanceof Error ? error.message : "An unexpected error occurred.");
     } finally {
       setLoading(false);
     }
@@ -68,6 +90,7 @@ export default function Home() {
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
+    setError(null);
   };
 
   if (loading) {
@@ -179,12 +202,22 @@ export default function Home() {
           <div className="w-full lg:w-1/2">
             <div className="flex justify-center">
               <div className="w-full max-w-md">
-                <SwipeCards meals={response} />
+                <SwipeCards 
+                  meals={response} 
+                  onIndexChange={(index) => setCurrentCardIndex(index)}
+                />
               </div>
             </div>
           </div>
           <div className="w-full lg:w-1/2 h-[600px] lg:h-auto">
-            <GeolocationFetch />
+            <MapView 
+              restaurants={response}
+              currentIndex={currentCardIndex}
+              userLocation={{
+                lat: formData.lat,
+                long: formData.long
+              }}
+            />
           </div>
         </div>
       )}

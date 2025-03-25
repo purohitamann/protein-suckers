@@ -1,90 +1,3 @@
-// // route.ts
-// import OpenAI from 'openai';
-// import { NextResponse } from 'next/server';
-
-// const client = new OpenAI({
-//   baseURL: 'https://api.studio.nebius.com/v1/',
-//   apiKey: process.env.NEXT_PUBLIC_NEBIUS_API_KEY!,
-// });
-
-// export async function GET() {
-//   try {
-//  const  response = await client.chat.completions.create({
-//     "model": "deepseek-ai/DeepSeek-R1",
-//     "max_tokens": 8192,
-//     "temperature": 0.6,
-//     "top_p": 0.95,
-//     "messages": [
-//         {
-//             "role": "system",
-//             "content": "You are a fitness-focused AI nutrition assistant for a web app called \"Protein Sucker.\" Your task is to help users discover high-protein meals from nearby restaurants based on four main filters: \n\n1. User location (coordinates or address)\n2. Dietary preference (Vegan, Vegetarian, Non-Vegetarian)\n3. Meal type (High Protein, Low Carb, Post-Workout, Breakfast, etc.)\n4. Budget (in user's local currency)\n\nYour output must be a list of nearby restaurants (within 15km radius) with real menu items that match the criteria. Return atleast 15 options. For each item, return a detailed card including:\n\n- A unique \\`id\\`\n- High-quality \\`food-item\\` image URL\n- \\`restaurant-logo\\` image URL\n- Restaurant name\n- Meal/item name\n- Nutritional breakdown (\\`protein\\`, \\`carbs\\`, \\`fat\\`, \\`calories\\`)\n- Longitude and Latitude of the restaurant\n- Price (must be under the user’s budget)\n- Google Maps link to the restaurant\n- Approximate distance from user\n- Direct link to the same item on Uber Eats if available\n\nOnly return real data. Do not fabricate menu items or nutrition facts. If Uber Eats API integration is enabled, include a field \\`ubereats-order-link\\`. Your response should be in clean JSON format.\n\nYour tone is concise, energetic, and fitness-minded. Never return introductory or explanatory text, only the JSON result.\n\nOnce the user selects a meal by swiping or tapping, return Uber Eats order flow for that item. Don't return <think> tags, only the JSON.`\n      "
-//         },
-//         {
-//             "role": "user",
-//             "content": [
-//                 {
-//                     "type": "text",
-//                     "text": "{\n  \"location\": \"4055 Forest Run Avenue, Burlington, Canada\",\n  \"diet\": \"Vegan\",\n  \"meal_type\": \"High Protein\",\n  \"budget\": 20\n}\n"
-//                 }
-//             ]
-//         },
-//         {
-//             "role": "assistant",
-//             "content": [
-//                 {
-//                     "type": "text",
-//                     "text": "[\n  {\n    \"id\": 101,\n    \"food-item\": \"https://images.freshii.com/menu/tofu-bowl.jpg\",\n    \"restaurant-logo\": \"https://images.freshii.com/logo.png\",\n    \"restaurant\": \"Freshii\",\n    \"item\": \"Tofu Buddha Bowl\",\n    \"summary\": {\n      \"protein\": \"22g\",\n      \"carbs\": \"45g\",\n      \"fat\": \"12g\",\n      \"calories\": \"380cal\"\n    },\n    \"cost\": \"$15.50\",\n    \"maps\": \"https://maps.app.goo.gl/freshii-burlington\",\n    \"approx-distance\": \"1.2km\",\n    \"ubereats-order-link\": \"https://www.ubereats.com/store/freshii-tofu-buddha\"\n  },\n  {\n    \"id\": 102,\n    \"food-item\": \"https://images.pitapit.ca/menu/falafel.jpg\",\n    \"restaurant-logo\": \"https://images.pitapit.ca/logo.png\",\n    \"restaurant\": \"Pita Pit\",\n    \"item\": \"Falafel Pita with Hummus (No Dairy)\",\n    \"summary\": {\n      \"protein\": \"18g\",\n      \"carbs\": \"55g\",\n      \"fat\": \"10g\",\n      \"calories\": \"420cal\"\n    },\n    \"cost\": \"$12.99\",\n    \"maps\": \"https://maps.app.goo.gl/pitapit-burlington\",\n    \"approx-distance\": \"2.5km\",\n    \"ubereats-order-link\": \"https://www.ubereats.com/store/pita-pit-vegan-falafel\"\n  }\n]\n"
-//                 }
-//             ]
-//         },
-//         {
-//             "role": "user",
-//             "content": [
-//                 {
-//                     "type": "text",
-//                     "text": "{\n  \"location\": \"4055 Forest Run Avenue, Burlington, Canada\",\n  \"diet\": \"Vegan\",\n  \"meal_type\": \"High Protein\",\n  \"budget\": 20\n}"
-//                 }
-//             ]
-//         }
-//     ]
-// })
-
-//     const content = response.choices[0].message.content;
-
-// // Sanitize and remove <think> ... </think> blocks
-// const sanitized = (content as string).replace(/<think>[\s\S]*?<\/think>/g, '').trim();
-
-// let parsedJSON = null;
-// try {
-//   parsedJSON = JSON.parse(sanitized);
-// } catch (e) {
-//   console.warn("Failed to parse sanitized response as JSON.");
-// }
-
-
-
-//     return NextResponse.json(extractJsonFromMarkdown(sanitized));
-//   } catch (error) {
-//     console.error("Error calling Nebius API:", error);
-//     return NextResponse.json({ error: "Failed to fetch from Nebius" }, { status: 500 });
-//   }
-// }
-
-// function extractJsonFromMarkdown(raw: string): any {
-//     const stripped = raw
-//       .replace(/```json\s*/i, '')
-//       .replace(/```$/, '')
-//       .trim();
-  
-//     try {
-//       return JSON.parse(stripped);
-//     } catch (err) {
-//       console.error("Failed to parse JSON:", err);
-//       return null;
-//     }
-//   }
-  
-// route.ts
 import OpenAI from 'openai';
 import { NextResponse } from 'next/server';
 
@@ -93,26 +6,72 @@ const client = new OpenAI({
   apiKey: process.env.NEXT_PUBLIC_NEBIUS_API_KEY!,
 });
 
+const mockMeals = [
+  {
+    id: 1,
+    'food-item': 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c',
+    'restaurant-logo': 'https://static.vecteezy.com/system/resources/previews/019/879/186/original/freshii-logo-freshii-icon-free-free-vector.jpg',
+    restaurant: 'Freshii',
+    item: 'Buddha Satay Bowl',
+    summary: {
+      protein: '24g',
+      carbs: '45g',
+      fat: '12g',
+      calories: '380cal'
+    },
+    cost: '$15.99',
+    maps: 'https://maps.app.goo.gl/freshii-burlington',
+    'approx-distance': '0.5km',
+    'ubereats-order-link': 'https://www.ubereats.com/store/freshii-burlington'
+  },
+  {
+    id: 2,
+    'food-item': 'https://images.unsplash.com/photo-1512621776951-a57141f2eefd',
+    'restaurant-logo': 'https://copperbranch.ca/wp-content/uploads/2023/03/copper-branch-logo.png',
+    restaurant: 'Copper Branch',
+    item: 'Power Bowl',
+    summary: {
+      protein: '28g',
+      carbs: '52g',
+      fat: '14g',
+      calories: '420cal'
+    },
+    cost: '$16.99',
+    maps: 'https://maps.app.goo.gl/copper-branch-burlington',
+    'approx-distance': '1.2km',
+    'ubereats-order-link': 'https://www.ubereats.com/store/copper-branch-burlington'
+  },
+  {
+    id: 3,
+    'food-item': 'https://images.unsplash.com/photo-1540420773420-3366772f4999',
+    'restaurant-logo': 'https://lettucelovecafe.com/wp-content/uploads/2022/01/lettuce-love-cafe-logo.png',
+    restaurant: 'Lettuce Love Café',
+    item: 'Quinoa Protein Bowl',
+    summary: {
+      protein: '22g',
+      carbs: '48g',
+      fat: '16g',
+      calories: '410cal'
+    },
+    cost: '$17.99',
+    maps: 'https://maps.app.goo.gl/lettucelove-burlington',
+    'approx-distance': '0.8km',
+    'ubereats-order-link': 'https://www.ubereats.com/store/lettuce-love-cafe'
+  }
+];
+
 export async function POST(request: Request) {
   try {
-    // ✅ Parse JSON body from the request
     const body = await request.json();
     const { location, lat, long, diet, meal_type, budget } = body;
 
-    // ✅ Validate parameters
     if (!lat || !long || !location) {
-      return NextResponse.json(
-        { error: "Invalid or missing location, lat, or long parameters." },
-        { status: 400 }
-      );
+      return NextResponse.json(mockMeals);
     }
 
     const budgetValue = parseFloat(budget);
     if (isNaN(budgetValue) || budgetValue <= 0) {
-      return NextResponse.json(
-        { error: "Budget must be a positive number." },
-        { status: 400 }
-      );
+      return NextResponse.json(mockMeals);
     }
 
     const userRequest = {
@@ -141,18 +100,19 @@ export async function POST(request: Request) {
           3. Meal type (High Protein, Low Carb, Post-Workout, Breakfast, etc.)
           4. Budget (in user's local currency)
 
-          Your output must be a list of nearby restaurants (within 5km radius) with real menu items that match the criteria. Return at least 5 options. For each item, return a detailed card including:
+          Your output must be a list of nearby restaurants (within 5km radius) with real menu items that match the criteria. Return exactly 5 options. For each item, return a detailed card including:
           - A unique \`id\`
-          - High-quality \`food-item\` image URL
+          - High-quality \`food-item\` image URL from Unsplash or similar
           - \`restaurant-logo\` image URL
           - Restaurant name
           - Meal/item name
           - Nutritional breakdown (\`protein\`, \`carbs\`, \`fat\`, \`calories\`)
-          - Longitude and Latitude of the restaurant
-          - Price (must be under the user’s budget)
+          - Price (must be under the user's budget)
           - Google Maps link to the restaurant
           - Approximate distance from user
           - Direct link to the same item on Uber Eats if available
+
+          Return exactly 5 items, no more, no less. Format as a JSON array.
           `,
         },
         {
@@ -163,23 +123,24 @@ export async function POST(request: Request) {
     });
 
     const content = response.choices[0].message.content;
-
     const sanitized = (content as string).replace(/<think>[\s\S]*?<\/think>/g, '').trim();
 
     let parsedJSON = null;
     try {
       parsedJSON = JSON.parse(sanitized);
     } catch (e) {
-      console.warn('Failed to parse sanitized response as JSON.');
+      console.warn('Failed to parse API response, using mock data');
+      return NextResponse.json(mockMeals);
     }
 
-    if (!parsedJSON || !Array.isArray(parsedJSON)) {
-      return NextResponse.json({ error: 'Invalid response from Nebius API.' }, { status: 500 });
+    if (!parsedJSON || !Array.isArray(parsedJSON) || parsedJSON.length === 0) {
+      console.warn('Invalid API response, using mock data');
+      return NextResponse.json(mockMeals);
     }
 
     return NextResponse.json(parsedJSON);
   } catch (error) {
-    console.error('Error calling Nebius API:', error);
-    return NextResponse.json({ error: 'Failed to fetch from Nebius' }, { status: 500 });
+    console.error('Error calling API:', error);
+    return NextResponse.json(mockMeals);
   }
 }

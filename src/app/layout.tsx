@@ -17,6 +17,11 @@ export default function RootLayout({
       <body
         className={` antialiased`}
       >
+          <script
+          src={`https://maps.googleapis.com/maps/api/js?key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_KEY}&callback=initMap`}
+          async
+          defer
+        ></script>
         {children}
       </body>
     </html>
